@@ -192,3 +192,4 @@ function closeStats() {
     document.getElementById('stats-panel').classList.add('hidden');
     document.getElementById('admin-panel').classList.remove('hidden');
 }
+
