@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExtraMath | Professional Test Tizimi</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main-container">
+        <div id="home-card" class="card">
+            <div class="logo-box">
+                <img src="logotip.png" alt="ExtraMath Logo" class="main-logo">
+            </div>
+            <h2 class="title">TEST TIZIMI</h2>
+            <div class="button-group">
+                <button class="btn-primary" onclick="showUserForm()">Testni tekshirish</button>
+                <button class="btn-outline" onclick="loginAdmin()">Admin</button>
+            </div>
+            <a href="https://myurls.co/penguinmath" target="_blank" class="join-link">ExtraMath ga qo'shiling</a>
+        </div>
+
+        <div id="user-info-card" class="card hidden">
+            <h3>Ma'lumotlar</h3>
+            <input type="text" id="userName" placeholder="Ism Familiya">
+            <input type="text" id="userRegion" placeholder="Turar joy">
+            <input type="text" id="userTestCode" placeholder="Test kodi">
+            <button class="btn-primary" onclick="openTestSheet()">Boshlash</button>
+            <button class="btn-text" onclick="location.reload()">Orqaga</button>
+        </div>
+
+        <div id="test-sheet" class="card hidden wide-card">
+            <div id="user-display-info" class="user-info-bar"></div>
+            <div id="questions-grid" class="grid-container"></div>
+            <div class="action-buttons">
+                <button id="checkBtn" class="btn-primary" onclick="calculateFinalResult()">Tekshirish</button>
+                <button class="btn-outline hidden" id="resetBtn" onclick="location.reload()">Yangi test</button>
+            </div>
+        </div>
+
+        <div id="admin-panel" class="card hidden wide-card">
+            <div class="admin-top">
+                <h3>Yangi test: <input type="text" id="newTestCode" placeholder="Masalan: 217"></h3>
+                <button class="btn-text" onclick="location.reload()">Chiqish</button>
+            </div>
+            <div id="admin-questions-grid" class="grid-container"></div>
+            <button class="btn-primary" onclick="saveAdminKeys()">Testni tasdiqlash (Relevant)</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
