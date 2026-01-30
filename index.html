@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ExtraMath | Professional Test Tizimi</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="main-container">
+        
         <div id="home-card" class="card">
             <div class="logo-box">
                 <img src="logotip.png" alt="ExtraMath Logo" class="main-logo">
@@ -44,10 +46,32 @@
                 <button class="btn-text" onclick="location.reload()">Chiqish</button>
             </div>
             <div id="admin-questions-grid" class="grid-container"></div>
-            <button class="btn-primary" onclick="saveAdminKeys()">Testni tasdiqlash (Relevant)</button>
+            <div class="button-group" style="gap: 10px; display: flex; flex-direction: column;">
+                <button class="btn-primary" onclick="saveAdminKeys()">Testni tasdiqlash (Relevant)</button>
+                <button class="btn-outline" onclick="showStats()">Statistikani ko'rish</button>
+            </div>
         </div>
+
+        <div id="stats-panel" class="card hidden wide-card">
+            <div class="admin-top">
+                <h3>Natijalar va Analitika</h3>
+                <button class="btn-text" onclick="closeStats()">Orqaga</button>
+            </div>
+            
+            <div class="stats-content">
+                <h4 style="text-align: left; margin-top: 20px;">Foydalanuvchilar Ro'yxati</h4>
+                <div id="results-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #eee; border-radius: 10px; background: #fff;">
+                    </div>
+
+                <h4 style="text-align: left;">Savollar tahlili (Grafik)</h4>
+                <div style="background: white; padding: 15px; border-radius: 15px; border: 1px solid #eee;">
+                    <canvas id="statsChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
     </div>
+
     <script src="script.js"></script>
 </body>
-
 </html>
