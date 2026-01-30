@@ -1,6 +1,6 @@
-
 const ADMIN_PASS = "As1lbek_1221";
 let userSelections = {};
+let myChart = null; // Grafikni saqlash uchun
 
 function showUserForm() {
     document.getElementById('home-card').classList.add('hidden');
@@ -75,42 +75,120 @@ function openTestSheet() {
     buildGrid('questions-grid', 'user');
 }
 
+// NATIJANI HISOBLASH VA SAQLASH (XATOLARNI KO'RSATISH BILAN)
 function calculateFinalResult() {
     const code = document.getElementById('userTestCode').value.trim();
+    const name = document.getElementById('userName').value.trim() || "Noma'lum";
     const correct = JSON.parse(localStorage.getItem('extra_' + code));
     let totalScore = 0;
+    let analysis = {}; 
 
-    // 1-35 tekshirish
+    // 1-35 yopiq savollar
     for (let i = 1; i <= 35; i++) {
-        const userChoice = userSelections[i];
+        const userChoice = userSelections[i]; 
         const rightAns = correct.closed[i];
+        
         const userBtn = document.getElementById(`btn-user-${i}-${userChoice}`);
         const rightBtn = document.getElementById(`btn-user-${i}-${rightAns}`);
 
         if (userChoice === rightAns) {
             if(userBtn) userBtn.classList.add('correct');
             totalScore++;
+            analysis[i] = 1;
         } else {
             if(userBtn) userBtn.classList.add('wrong');
             if(rightBtn) rightBtn.classList.add('correct');
+            analysis[i] = 0;
         }
     }
 
-    // 36-45 tekshirish
+    // 36-45 ochiq savollar
     for (let i = 36; i <= 45; i++) {
-        const ua = document.getElementById(`user-${i}a`).value.trim();
-        const ub = document.getElementById(`user-${i}b`).value.trim();
+        const uaInput = document.getElementById(`user-${i}a`);
+        const ubInput = document.getElementById(`user-${i}b`);
         const ca = correct.open[i].a;
         const cb = correct.open[i].b;
 
-        if (ua === ca) { totalScore++; document.getElementById(`user-${i}a`).style.borderColor = "var(--success)"; }
-        else { document.getElementById(`user-${i}a`).style.borderColor = "var(--error)"; }
+        // a qismi
+        if (uaInput.value.trim() === ca) {
+            totalScore++;
+            uaInput.style.borderColor = "var(--success)";
+            analysis[`${i}a`] = 1;
+        } else {
+            uaInput.style.borderColor = "var(--error)";
+            uaInput.value = `${uaInput.value} (To'g'ri: ${ca})`;
+            analysis[`${i}a`] = 0;
+        }
 
-        if (ub === cb) { totalScore++; document.getElementById(`user-${i}b`).style.borderColor = "var(--success)"; }
-        else { document.getElementById(`user-${i}b`).style.borderColor = "var(--error)"; }
+        // b qismi
+        if (ubInput.value.trim() === cb) {
+            totalScore++;
+            ubInput.style.borderColor = "var(--success)";
+            analysis[`${i}b`] = 1;
+        } else {
+            ubInput.style.borderColor = "var(--error)";
+            ubInput.value = `${ubInput.value} (To'g'ri: ${cb})`;
+            analysis[`${i}b`] = 0;
+        }
     }
 
-    alert(`Test yakunlandi! To'g'ri javoblar soni: ${totalScore}`);
+    // Statistika uchun saqlash
+    const resultData = { name: name, score: totalScore, details: analysis, date: new Date().toLocaleString() };
+    let allResults = JSON.parse(localStorage.getItem('extra_results_' + code)) || [];
+    allResults.push(resultData);
+    localStorage.setItem('extra_results_' + code, JSON.stringify(allResults));
+
+    alert(`Test yakunlandi! Natija: ${totalScore} ta to'g'ri.`);
     document.getElementById('checkBtn').classList.add('hidden');
     document.getElementById('resetBtn').classList.remove('hidden');
+}
+
+// STATISTIKANI KO'RSATISH FUNKSIYASI
+function showStats() {
+    const code = document.getElementById('newTestCode').value.trim();
+    if(!code) return alert("Avval test kodini yozing!");
+    
+    const results = JSON.parse(localStorage.getItem('extra_results_' + code)) || [];
+    if(results.length === 0) return alert("Hali natijalar yo'q!");
+
+    document.getElementById('admin-panel').classList.add('hidden');
+    document.getElementById('stats-panel').classList.remove('hidden');
+
+    // Ro'yxatni chiqarish
+    const listDiv = document.getElementById('results-list');
+    listDiv.innerHTML = results.map(r => `
+        <div style="padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between;">
+            <span><b>${r.name}</b></span>
+            <span style="color: #8263ff">${r.score} ta to'g'ri</span>
+        </div>
+    `).join('');
+
+    // Grafik uchun ma'lumot tayyorlash
+    const labels = [];
+    const data = [];
+    for(let i = 1; i <= 35; i++) {
+        labels.push(i);
+        let count = results.reduce((sum, res) => sum + (res.details[i] || 0), 0);
+        data.push(count);
+    }
+
+    const ctx = document.getElementById('statsChart').getContext('2d');
+    if(myChart) myChart.destroy();
+    myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "To'g'ri topganlar soni",
+                data: data,
+                backgroundColor: '#8263ff'
+            }]
+        },
+        options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+}
+
+function closeStats() {
+    document.getElementById('stats-panel').classList.add('hidden');
+    document.getElementById('admin-panel').classList.remove('hidden');
 }
