@@ -75,6 +75,23 @@ function openTestSheet() {
     buildGrid('questions-grid', 'user');
 }
 
+// ==========================
+// DEMO TEST KODI FUNKSIYASI
+// ==========================
+function checkDemoCode() {
+    const input = document.getElementById('userTestCode').value.trim();
+    const validCodes = ["MATH1", "TEST2026"]; // demo uchun ishlaydigan kodlar
+
+    if (validCodes.includes(input)) {
+        // test sahifaga o‘tish
+        document.getElementById('user-info-card').classList.add('hidden');
+        document.getElementById('test-sheet').classList.remove('hidden');
+        buildGrid('questions-grid', 'user'); // sizning mavjud buildGrid funksiyangiz
+    } else {
+        alert("❌ Test kodi noto‘g‘ri");
+    }
+}
+
 // NATIJANI HISOBLASH VA SAQLASH (XATOLARNI KO'RSATISH BILAN)
 function calculateFinalResult() {
     const code = document.getElementById('userTestCode').value.trim();
@@ -192,4 +209,3 @@ function closeStats() {
     document.getElementById('stats-panel').classList.add('hidden');
     document.getElementById('admin-panel').classList.remove('hidden');
 }
-
