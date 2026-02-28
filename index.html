@@ -3,77 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ExtraMath | Professional Test Tizimi</title>
-    <link rel="stylesheet" href="style.css">
+    <title>ExtraMath - Onlayn Test Tizimi</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-
-<body>
-<div class="main-container">
-
-    <!-- ADMIN PANEL -->
-    <div id="home-card" class="card">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        :root { --primary: #7B61FF; --bg: #F5F7FF; --white: #ffffff; --text: #2D3436; --success: #00B894; --error: #D63031; --border: #E1E4E8; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .container { background: var(--white); width: 100%; max-width: 900px; padding: 35px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); text-align: center; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .hidden { display: none !important; }
+        .logo { width: 80px; border-radius: 50%; margin-bottom: 15px; }
+        h2 { margin-bottom: 20px; }
+        input, select { width: 100%; max-width: 350px; padding: 14px; margin: 10px 0; border: 2px solid var(--border); border-radius: 12px; font-size: 15px; outline: none; }
+        .btn { width: 100%; max-width: 350px; padding: 16px; margin: 10px 0; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: none; border: 2px solid var(--primary); color: var(--primary); }
         
-        <div class="logo-box">
-            <img src="logotip.png" alt="ExtraMath Logo" class="main-logo">
-        </div>
+        .titul-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 25px 0; max-height: 450px; overflow-y: auto; padding: 10px; }
+        .q-row { display: flex; align-items: center; background: #F8F9FD; padding: 10px; border-radius: 12px; border: 1px solid #EDEDED; }
+        .q-num { font-weight: bold; width: 30px; }
+        .opt-group { display: flex; gap: 5px; flex: 1; justify-content: center; }
+        .opt-btn { width: 32px; height: 32px; border: 2px solid #DCDDE1; border-radius: 50%; background: white; font-weight: bold; cursor: pointer; }
+        .opt-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
+        .open-input { flex: 1; padding: 8px; border: 2px solid #DCDDE1; border-radius: 8px; text-align: center; margin: 0 2px; }
+        
+        /* Natija ranglari */
+        .correct { background: var(--success) !important; color: white !important; }
+        .wrong { background: var(--error) !important; color: white !important; }
+        .show-correct { border: 2px dashed var(--success) !important; color: var(--success) !important; }
+        
+        .link-text { color: var(--primary); text-decoration: none; font-weight: bold; display: block; margin-top: 15px; }
+        @media (max-width: 700px) { .titul-container { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
 
-        <!-- TEST CODE -->
-        <h3 style="margin-top:20px;">
-            Yangi test:
-            <input 
-                type="text" 
-                id="newTestCode" 
-                value="TEST1"
-                style="padding:8px 12px; border-radius:8px; border:1px solid #ddd;"
-            >
-        </h3>
-
-        <div class="admin-top">
-            <button class="btn-text" onclick="location.reload()">Chiqish</button>
-        </div>
-
-        <div id="admin-questions-grid" class="grid-container"></div>
-
-        <!-- BUTTON GROUP -->
-        <div class="button-group" style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
-            <button class="btn-primary" onclick="saveAdminKeys()">
-                Testni tasdiqlash
-            </button>
-
-            <button class="btn-outline" onclick="showStats()">
-                Statistikani ko'rish
-            </button>
-        </div>
-
+    <div id="home-screen" class="container">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6-mX7fQc_9p_P1Y9K4l_8nO5U_9Pj_pX_RA&s" class="logo">
+        <h2>ExtraMath Test</h2>
+        <button class="btn btn-primary" onclick="showScreen('student-info')">Javoblarni tekshirish</button>
+        <button class="btn btn-outline" onclick="loginAdmin()">Admin Panel</button>
+        <a href="https://myurls.co/penguinmath" class="link-text">ExtraMathga qo'shiling</a>
     </div>
 
+    <div id="student-info" class="container hidden">
+        <h2>Ma'lumotlarni kiriting</h2>
+        <select id="s-region">
+            <option value="">Viloyatni tanlang</option>
+            <option value="Buxoro">Buxoro</option>
+            <option value="Toshkent shahri">Toshkent shahri</option>
+            <option value="Andijon">Andijon</option>
+            <option value="Farg'ona">Farg'ona</option>
+            <option value="Namangan">Namangan</option>
+            <option value="Samarqand">Samarqand</option>
+            <option value="Navoiy">Navoiy</option>
+            <option value="Jizzax">Jizzax</option>
+            <option value="Sirdaryo">Sirdaryo</option>
+            <option value="Surxondaryo">Surxondaryo</option>
+            <option value="Qashqadaryo">Qashqadaryo</option>
+            <option value="Xorazm">Xorazm</option>
+            <option value="Qoraqalpog'iston">Qoraqalpog'iston</option>
+        </select>
+        <input type="text" id="s-name" placeholder="Ism Familyangiz">
+        <input type="text" id="s-code" placeholder="Test kodi">
+        <button class="btn btn-primary" onclick="startTest()">Tasdiqlash</button>
+        <button class="btn btn-outline" onclick="showScreen('home-screen')">Orqaga</button>
+    </div>
 
-    <!-- STATISTICS PANEL -->
-    <div id="stats-panel" class="card hidden wide-card">
-
-        <div class="admin-top">
-            <h3>Natijalar va Analitika</h3>
-            <button class="btn-text" onclick="closeStats()">Orqaga</button>
-        </div>
-
-        <div class="stats-content">
-
-            <h4 style="margin-top:20px;">Foydalanuvchilar Ro'yxati</h4>
-            <div id="results-list"
-                 style="max-height:200px; overflow-y:auto; margin-bottom:20px; border:1px solid #eee; border-radius:10px; background:#fff;">
-            </div>
-
-            <h4>Savollar tahlili (Grafik)</h4>
-            <div style="background:white; padding:15px; border-radius:15px; border:1px solid #eee;">
-                <canvas id="statsChart"></canvas>
-            </div>
-
+    <div id="test-screen" class="container hidden" style="max-width: 950px;">
+        <h2 id="display-info">Test Varaqasi</h2>
+        <div class="titul-container" id="titul-grid"></div>
+        <button id="submit-btn" class="btn btn-primary" onclick="gradeTest()">Javoblarni Tasdiqlash</button>
+        <div id="result-box" class="hidden">
+            <h3 id="score-text"></h3>
+            <button class="btn btn-outline" onclick="location.reload()">Chiqish</button>
         </div>
     </div>
 
-</div>
+    <div id="admin-panel" class="container hidden" style="max-width: 950px;">
+        <h2>Admin - Test Yaratish</h2>
+        <input type="text" id="admin-test-code" placeholder="Test kodi (masalan: 123)">
+        <div class="titul-container" id="admin-titul-grid"></div>
+        <button class="btn btn-primary" onclick="saveAdminKeys()">Javoblarni yaratish</button>
+        <button class="btn btn-outline" onclick="location.reload()">Chiqish</button>
+    </div>
 
-<script src="script.js"></script>
+    <script>
+        // FIREBASE INITIALIZATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJT5pYRr2tz0HcoUb2EdntaKi0IOyjd20",
+            authDomain: "extramath-833c2.firebaseapp.com",
+            databaseURL: "https://extramath-833c2-default-rtdb.firebaseio.com", 
+            projectId: "extramath-833c2",
+            storageBucket: "extramath-833c2.firebasestorage.app",
+            messagingSenderId: "815291991853",
+            appId: "1:815291991853:web:d3250bb61c9d30821bf5a4"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        function showScreen(id) {
+            document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function loginAdmin() {
+            const pass = prompt("Admin parolini kiriting:");
+            if (pass === "As1lbek_1221") {
+                showScreen('admin-panel');
+                renderTitul('admin-titul-grid');
+            } else { alert("Xato!"); }
+        }
+
+        function renderTitul(containerId) {
+            const grid = document.getElementById(containerId);
+            grid.innerHTML = '';
+            for (let i = 1; i <= 45; i++) {
+                const row = document.createElement('div');
+                row.className = 'q-row';
+                row.innerHTML = `<span class="q-num">${i}.</span>`;
+
+                if (i <= 35) {
+                    const group = document.createElement('div');
+                    group.className = 'opt-group';
+                    ['A', 'B', 'C', 'D'].forEach(opt => {
+                        const btn = document.createElement('button');
+                        btn.className = 'opt-btn';
+                        btn.innerText = opt;
+                        btn.onclick = (e) => {
+                            const parent = e.target.parentElement;
+                            parent.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+                            e.target.classList.add('selected');
+                        };
+                        btn.dataset.q = i; btn.dataset.v = opt;
+                        group.appendChild(btn);
+                    });
+                    row.appendChild(group);
+                } else {
+                    row.innerHTML += `
+                        <div class="open-group" style="display:flex; flex:1;">
+                            <input type="text" placeholder="a qism" class="open-input q-a-${i}">
+                            <input type="text" placeholder="b qism" class="open-input q-b-${i}">
+                        </div>`;
+                }
+                grid.appendChild(row);
+            }
+        }
+
+        async function startTest() {
+            const code = document.getElementById('s-code').value.trim();
+            if (!code || !document.getElementById('s-name').value) return alert("Ma'lumotlarni to'ldiring!");
+
+            const snap = await database.ref('tests/' + code).once('value');
+            if (!snap.exists()) return alert("Test topilmadi!");
+
+            window.correctKeys = snap.val();
+            showScreen('test-screen');
+            renderTitul('titul-grid');
+            document.getElementById('display-info').innerText = "Test kodi: #" + code;
+        }
+
+        function gradeTest() {
+            const keys = window.correctKeys;
+            let score = 0;
+            let total = 45;
+
+            // 35 ta ABCD
+            for (let i = 1; i <= 35; i++) {
+                const sel = document.querySelector(`#titul-grid .opt-btn.selected[data-q="${i}"]`);
+                const userVal = sel ? sel.innerText : "";
+                const correctVal = keys[i];
+
+                const allBtns = document.querySelectorAll(`#titul-grid .opt-btn[data-q="${i}"]`);
+                allBtns.forEach(b => {
+                    if(b.innerText === correctVal) b.classList.add('show-correct');
+                    if(b === sel) {
+                        if(userVal === correctVal) { b.classList.add('correct'); score++; }
+                        else { b.classList.add('wrong'); }
+                    }
+                });
+            }
+
+            // 10 ta yozma
+            for (let i = 36; i <= 45; i++) {
+                const inA = document.querySelector(`.q-a-${i}`);
+                const inB = document.querySelector(`.q-b-${i}`);
+                const ansObj = keys[i];
+
+                if(inA.value.trim().toLowerCase() === ansObj.a.toLowerCase()) { inA.classList.add('correct'); score += 0.5; }
+                else { inA.classList.add('wrong'); inA.value += " -> " + ansObj.a; }
+
+                if(inB.value.trim().toLowerCase() === ansObj.b.toLowerCase()) { inB.classList.add('correct'); score += 0.5; }
+                else { inB.classList.add('wrong'); inB.value += " -> " + ansObj.b; }
+            }
+
+            // Firebase ga natijani saqlash
+            database.ref('results').push({
+                name: document.getElementById('s-name').value,
+                region: document.getElementById('s-region').value,
+                score: score,
+                code: document.getElementById('s-code').value
+            });
+
+            document.getElementById('score-text').innerText = `Natija: ${score} / ${total}`;
+            document.getElementById('submit-btn').classList.add('hidden');
+            document.getElementById('result-box').classList.remove('hidden');
+        }
+
+        function saveAdminKeys() {
+            const code = document.getElementById('admin-test-code').value.trim();
+            if(!code) return alert("Kod kiriting!");
+
+            let keys = {};
+            for (let i = 1; i <= 35; i++) {
+                const sel = document.querySelector(`#admin-titul-grid .opt-btn.selected[data-q="${i}"]`);
+                keys[i] = sel ? sel.innerText : "A";
+            }
+            for (let i = 36; i <= 45; i++) {
+                keys[i] = {
+                    a: document.querySelector(`#admin-titul-grid .q-a-${i}`).value || "0",
+                    b: document.querySelector(`#admin-titul-grid .q-b-${i}`).value || "0"
+                };
+            }
+
+            database.ref('tests/' + code).set(keys).then(() => {
+                alert("Test yaratildi!");
+                location.reload();
+            });
+        }
+    </script>
 </body>
 </html>
